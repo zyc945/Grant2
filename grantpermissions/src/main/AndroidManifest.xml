@@ -4,7 +4,7 @@
 
     <application>
         <activity
-            android:name=".demo.InvisiblePermissionRequestActivity"
+            android:name=".InvisiblePermissionRequestActivity"
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.NoDisplay"/>
     </application>

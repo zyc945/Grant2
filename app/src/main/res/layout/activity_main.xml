@@ -17,7 +17,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="get_Read_Phone_State"
-        android:onClick="OnBtnClick"
         />
 
     <Button
@@ -25,7 +24,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="get_Camera_permission"
-        android:onClick="OnBtnClick"
         />
 
 
@@ -34,7 +32,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="get_read_contacts"
-        android:onClick="OnBtnClick"
         />
 
     <Button
@@ -42,7 +39,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="get_user_fingerprint"
-        android:onClick="OnBtnClick"
         />
 
 </LinearLayout>

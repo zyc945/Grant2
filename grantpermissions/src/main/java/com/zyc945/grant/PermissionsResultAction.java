@@ -92,7 +92,7 @@ public abstract class PermissionsResultAction {
      * absence of the permission on the API level as a denial.
      */
     @SuppressWarnings({"WeakerAccess", "SameReturnValue"})
-    public synchronized boolean isNotFoundPermissionAsGranted(String permission) {
+    protected synchronized boolean isNotFoundPermissionAsGranted(String permission) {
         Log.d(TAG, "Permission not found: " + permission);
         for (String ignoredPermission : NOT_FOUND_AS_DENIED_PERMISSIONS) {
             if (TextUtils.equals(ignoredPermission, permission)) {
