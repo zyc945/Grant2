@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Grant</string>
+    <string name="grant_read_phone_state">get read_phone_state permission</string>
+</resources>
