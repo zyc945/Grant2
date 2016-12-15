@@ -37,15 +37,15 @@ public class PermissionsManager {
      */
     @IntDef({PERMISSION_GRANTED, PERMISSION_DENIED, PERMISSION_NOT_FOUND})
     @Retention(RetentionPolicy.SOURCE)
-    @interface AuthorizedResult {
+    public @interface AuthorizedResult {
     }
 
     /**
-     * same define as the {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
+     * same define as the {@link PackageManager#PERMISSION_GRANTED}
      */
     static final int PERMISSION_GRANTED = 0;
     /**
-     * same define as the {@link android.content.pm.PackageManager#PERMISSION_DENIED}
+     * same define as the {@link PackageManager#PERMISSION_DENIED}
      */
     static final int PERMISSION_DENIED = -1;
     /**
@@ -229,8 +229,8 @@ public class PermissionsManager {
      */
     @SuppressWarnings("unused")
     static synchronized void requestPermissionsIfNecessaryForResult(@Nullable Activity activity,
-                                                                           @NonNull String[] permissions,
-                                                                           @Nullable PermissionsResultAction action) {
+                                                                    @NonNull String[] permissions,
+                                                                    @Nullable PermissionsResultAction action) {
         if (activity == null) {
             return;
         }
@@ -251,27 +251,6 @@ public class PermissionsManager {
         }
     }
 
-    public static synchronized void requestPermissions(@Nullable Activity activity,
-                                                       @NonNull String[] permissions,
-                                                       @Nullable PermissionsResultAction action) {
-        if (activity == null) {
-            return;
-        }
-        addPendingAction(permissions, action);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            doPermissionWorkBeforeAndroidM(activity, permissions, action);
-        } else {
-            List<String> permList = getPermissionsListToRequest(activity, permissions, action);
-            if (permList.isEmpty()) {
-                //if there is no permission to request, there is no reason to keep the action int the list
-                removePendingAction(action);
-            } else {
-                PENDING_AUTHORIZED_PERMISSIONS.addAll(permList);
-                activity.startActivity(new Intent(activity, InvisiblePermissionRequestActivity.class));
-            }
-        }
-    }
-
     /**
      * This method should be used to execute a {@link PermissionsResultAction} for the array
      * of permissions passed to this method. This method will request the permissions if
@@ -287,13 +266,34 @@ public class PermissionsManager {
      */
     @SuppressWarnings("unused")
     static synchronized void requestPermissionsIfNecessaryForResult(@NonNull Fragment fragment,
-                                                                           @NonNull String[] permissions,
-                                                                           @Nullable PermissionsResultAction action) {
+                                                                    @NonNull String[] permissions,
+                                                                    @Nullable PermissionsResultAction action) {
         Activity activity = fragment.getActivity();
         if (activity == null) {
             return;
         }
         requestPermissionsIfNecessaryForResult(activity, permissions, action);
+    }
+
+    public static synchronized void requestPermissions(@Nullable Context context,
+                                                       @NonNull String[] permissions,
+                                                       @Nullable PermissionsResultAction action) {
+        if (context == null) {
+            return;
+        }
+        addPendingAction(permissions, action);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            doPermissionWorkBeforeAndroidM(context, permissions, action);
+        } else {
+            List<String> permList = getPermissionsListToRequest(context, permissions, action);
+            if (permList.isEmpty()) {
+                //if there is no permission to request, there is no reason to keep the action int the list
+                removePendingAction(action);
+            } else {
+                PENDING_AUTHORIZED_PERMISSIONS.addAll(permList);
+                context.startActivity(new Intent(context, InvisiblePermissionRequestActivity.class));
+            }
+        }
     }
 
     /**
@@ -309,7 +309,7 @@ public class PermissionsManager {
      * @param results     the values for each permission.
      */
     @SuppressWarnings("unused")
-    public static synchronized void notifyPermissionsChange(@NonNull String[] permissions, @NonNull int[] results) {
+    static synchronized void notifyPermissionsChange(@NonNull String[] permissions, @NonNull int[] results) {
         int size = permissions.length;
         if (results.length < size) {
             size = results.length;
@@ -333,19 +333,19 @@ public class PermissionsManager {
      * When request permissions on devices before Android M (Android 6.0, API Level 23)
      * Do the granted or denied work directly according to the permission status
      *
-     * @param activity    the activity to check permissions
+     * @param context    the context to check permissions
      * @param permissions the permissions names
      * @param action      the callback work object, containing what we what to do after
      *                    permission check
      */
-    private static void doPermissionWorkBeforeAndroidM(@NonNull Activity activity,
+    private static void doPermissionWorkBeforeAndroidM(@NonNull Context context,
                                                        @NonNull String[] permissions,
                                                        @Nullable PermissionsResultAction action) {
         for (String perm : permissions) {
             if (action != null) {
                 if (!SYSTEM_SUPPORT_PERMISSIONS.contains(perm)) {
                     action.onResult(perm, PERMISSION_NOT_FOUND);
-                } else if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
+                } else if (ActivityCompat.checkSelfPermission(context, perm) != PackageManager.PERMISSION_GRANTED) {
                     action.onResult(perm, PERMISSION_DENIED);
                 } else {
                     action.onResult(perm, PERMISSION_GRANTED);
@@ -359,14 +359,14 @@ public class PermissionsManager {
      * If a permission is not granted, add it to the result list
      * if a permission is granted, do the granted work, do not add it to the result list
      *
-     * @param activity    the activity to check permissions
+     * @param context    the context to check permissions
      * @param permissions all the permissions names
      * @param action      the callback work object, containing what we what to do after
      *                    permission check
      * @return a list of permissions names that are not granted yet
      */
     @NonNull
-    private static List<String> getPermissionsListToRequest(@NonNull Activity activity,
+    private static List<String> getPermissionsListToRequest(@NonNull Context context,
                                                             @NonNull String[] permissions,
                                                             @Nullable PermissionsResultAction action) {
         List<String> permList = new ArrayList<>(permissions.length);
@@ -375,7 +375,7 @@ public class PermissionsManager {
                 if (action != null) {
                     action.onResult(perm, PERMISSION_NOT_FOUND);
                 }
-            } else if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
+            } else if (ActivityCompat.checkSelfPermission(context, perm) != PackageManager.PERMISSION_GRANTED) {
                 if (!PENDING_AUTHORIZED_PERMISSIONS.contains(perm)) {
                     permList.add(perm);
                 }

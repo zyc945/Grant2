@@ -10,6 +10,8 @@ import android.widget.Toast;
 import com.zyc945.grant.PermissionsManager;
 import com.zyc945.grant.PermissionsResultAction;
 
+import java.util.Arrays;
+
 public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     @Override
@@ -25,65 +27,47 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     @Override
     public void onClick(View view) {
+        String[] proceedPermissions = null;
         switch (view.getId()) {
             case R.id.getCameraPermission:
-                PermissionsManager.requestPermissions(this, new String[]{permission.CAMERA},
-                        new PermissionsResultAction() {
-                            @Override
-                            public void onGranted() {
-                                showToast(permission.CAMERA + " granted");
-                            }
-
-                            @Override
-                            public void onDenied(String permission) {
-                                showToast(permission + " denied");
-                            }
-                        });
+                proceedPermissions = new String[]{permission.CAMERA};
                 break;
             case R.id.getReadContacts:
-                PermissionsManager.requestPermissions(this, new String[]{permission.READ_CONTACTS},
-                        new PermissionsResultAction() {
-                            @Override
-                            public void onGranted() {
-                                showToast(permission.READ_CONTACTS + " granted");
-                            }
-
-                            @Override
-                            public void onDenied(String permission) {
-                                showToast(permission + " denied");
-                            }
-                        });
+                proceedPermissions = new String[]{permission.READ_CONTACTS};
                 break;
             case R.id.getReadPhoneState:
-                PermissionsManager.requestPermissions(this, new String[]{permission.READ_PHONE_STATE},
-                        new PermissionsResultAction() {
-                            @Override
-                            public void onGranted() {
-                                showToast(permission.READ_PHONE_STATE + " granted");
-                            }
-
-                            @Override
-                            public void onDenied(String permission) {
-                                showToast(permission + " denied");
-                            }
-                        });
+                proceedPermissions = new String[]{permission.READ_PHONE_STATE};
                 break;
             case R.id.getUserFingerprint:
-                PermissionsManager.requestPermissions(this, new String[]{permission.USE_FINGERPRINT},
-                        new PermissionsResultAction() {
-                            @Override
-                            public void onGranted() {
-                                showToast(permission.USE_FINGERPRINT + " granted");
-                            }
-
-                            @Override
-                            public void onDenied(String permission) {
-                                showToast(permission + " denied");
-                            }
-                        });
+                proceedPermissions = new String[]{permission.USE_FINGERPRINT};
                 break;
             default:
                 break;
+        }
+
+        if (null != proceedPermissions) {
+            PermissionsManager.requestPermissions(this, proceedPermissions,
+                    new CommonPermissionsResultAction().proceedPermission(proceedPermissions));
+        }
+
+    }
+
+    class CommonPermissionsResultAction extends PermissionsResultAction {
+        private String[] proceedPermissions;
+
+        public PermissionsResultAction proceedPermission(String[] permissions) {
+            proceedPermissions = permissions;
+            return this;
+        }
+
+        @Override
+        public void onGranted() {
+            showToast(Arrays.toString(proceedPermissions) + " granted");
+        }
+
+        @Override
+        public void onDenied(String permission) {
+            showToast(permission + " denied");
         }
     }
 
@@ -91,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
             }
         });
     }

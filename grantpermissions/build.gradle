@@ -1,14 +1,17 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: "com.jfrog.bintray"
 
 android {
+    publishNonDefault true
     compileSdkVersion 23
     buildToolsVersion '23.0.1'
 
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionCode VERSION_CODE as int
+        versionName VERSION_NAME
     }
     buildTypes {
         release {
@@ -16,8 +19,84 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                def fileName = getArtifactFileName()
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
 }
 
 dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
+}
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                name 'android permission grant manager'
+                description 'This project aims to provide a reusable permission grant manager to simplify the permission request procedure'
+                url SITE_URL
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'zyc945'
+                        name 'zyc945'
+                        email 'zyc945@gmail.com'
+                    }
+                }
+
+                scm {
+                    connection GIT_SITE_URL
+                    developerConnection GIT_SITE_URL
+                    url SITE_URL
+                }
+            }
+
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        // it is the name that appears in bintray when logged
+        name = "zyc945"
+        websiteUrl = SITE_URL
+        vcsUrl = GIT_SITE_URL
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
+
+def getArtifactFileName() {
+    return "${POM_ARTIFACT_ID}-${VERSION_NAME}.aar"
 }
