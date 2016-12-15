@@ -15,20 +15,19 @@ public class InvisiblePermissionRequestActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ActivityCompat.requestPermissions(this,
-                PermissionsManager.getPendingAuthorizedPermissions(), REQUEST_PERMISSION);
+        String[] permissions = PermissionsManager.getPendingAuthorizedPermissions();
+        if (permissions.length > 0) {
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSION);
+        } else {
+            finish();
+        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionsManager.notifyPermissionsChange(permissions, grantResults);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
+        if (REQUEST_PERMISSION == requestCode) {
+            PermissionsManager.notifyPermissionsChange(permissions, grantResults);
+        }
         finish();
     }
 }

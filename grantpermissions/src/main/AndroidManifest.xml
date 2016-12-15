@@ -5,7 +5,7 @@
     <application>
         <activity
             android:name=".InvisiblePermissionRequestActivity"
-            android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.NoDisplay"/>
+            android:launchMode="singleTop"
+            android:theme="@style/GrantPermissionsInvisibleActivityTheme"/>
     </application>
 </manifest>

@@ -28,7 +28,7 @@ import java.util.Set;
  * A class to help you manage your permissions simply.
  */
 public class PermissionsManager {
-    private static final String TAG = PermissionsManager.class.getSimpleName();
+    public static final String TAG = PermissionsManager.class.getSimpleName();
     private static final Set<String> PENDING_AUTHORIZED_PERMISSIONS = new HashSet<>();
     private static final List<WeakReference<PermissionsResultAction>> PENDING_AUTHORIZED_RESULT_ACTIONS = new ArrayList<>();
 
@@ -210,7 +210,7 @@ public class PermissionsManager {
             return;
         }
         String[] perms = getManifestPermissions(activity);
-        requestPermissionsIfNecessaryForResult(activity, perms, action);
+        requestPermissions(activity, perms, action);
     }
 
     /**
@@ -228,7 +228,7 @@ public class PermissionsManager {
      * @param action      the PermissionsResultAction to notify when the permissions are granted or denied.
      */
     @SuppressWarnings("unused")
-    public static synchronized void requestPermissionsIfNecessaryForResult(@Nullable Activity activity,
+    static synchronized void requestPermissionsIfNecessaryForResult(@Nullable Activity activity,
                                                                            @NonNull String[] permissions,
                                                                            @Nullable PermissionsResultAction action) {
         if (activity == null) {
@@ -266,9 +266,7 @@ public class PermissionsManager {
                 //if there is no permission to request, there is no reason to keep the action int the list
                 removePendingAction(action);
             } else {
-                String[] permsToRequest = permList.toArray(new String[permList.size()]);
                 PENDING_AUTHORIZED_PERMISSIONS.addAll(permList);
-//                ActivityCompat.requestPermissions(activity, permsToRequest, 1);
                 activity.startActivity(new Intent(activity, InvisiblePermissionRequestActivity.class));
             }
         }
@@ -288,27 +286,14 @@ public class PermissionsManager {
      * @param action      the PermissionsResultAction to notify when the permissions are granted or denied.
      */
     @SuppressWarnings("unused")
-    public static synchronized void requestPermissionsIfNecessaryForResult(@NonNull Fragment fragment,
+    static synchronized void requestPermissionsIfNecessaryForResult(@NonNull Fragment fragment,
                                                                            @NonNull String[] permissions,
                                                                            @Nullable PermissionsResultAction action) {
         Activity activity = fragment.getActivity();
         if (activity == null) {
             return;
         }
-        addPendingAction(permissions, action);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            doPermissionWorkBeforeAndroidM(activity, permissions, action);
-        } else {
-            List<String> permList = getPermissionsListToRequest(activity, permissions, action);
-            if (permList.isEmpty()) {
-                //if there is no permission to request, there is no reason to keep the action int the list
-                removePendingAction(action);
-            } else {
-                String[] permsToRequest = permList.toArray(new String[permList.size()]);
-                PENDING_AUTHORIZED_PERMISSIONS.addAll(permList);
-                fragment.requestPermissions(permsToRequest, 1);
-            }
-        }
+        requestPermissionsIfNecessaryForResult(activity, permissions, action);
     }
 
     /**
