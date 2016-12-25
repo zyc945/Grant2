@@ -1,6 +1,10 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: "com.jfrog.bintray"
+
+//libraryDescription = 'This project aims to provide a reusable permission grant manager to simplify the permission request procedure'
+//licenseName = 'The Apache Software License, Version 2.0'
+//licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
 
 android {
     publishNonDefault true
@@ -35,13 +39,37 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = "grant-permissions"
+        websiteUrl = SITE_URL
+        vcsUrl = GIT_SITE_URL
+        licenses = ["Apache-2.0"]
+        publish = true
+        version {
+            desc = 'This project aims to provide a reusable permission grant manager to simplify the permission request procedure'
+            gpg {
+                sign = true
+                passphrase = properties.getProperty("bintray.gpg.password")
+            }
+        }
+    }
+}
+
 install {
     repositories.mavenInstaller {
         pom {
             project {
                 packaging 'aar'
-                name 'android permission grant manager'
-                description 'This project aims to provide a reusable permission grant manager to simplify the permission request procedure'
+
+                name 'grant-permissions'
                 url SITE_URL
 
                 licenses {
@@ -58,42 +86,8 @@ install {
                         email 'zyc945@gmail.com'
                     }
                 }
-
-                scm {
-                    connection GIT_SITE_URL
-                    developerConnection GIT_SITE_URL
-                    url SITE_URL
-                }
             }
-
         }
-    }
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-artifacts {
-    archives sourcesJar
-}
-
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-    configurations = ['archives']
-    pkg {
-        repo = "maven"
-        // it is the name that appears in bintray when logged
-        name = "zyc945"
-        websiteUrl = SITE_URL
-        vcsUrl = GIT_SITE_URL
-        licenses = ["Apache-2.0"]
-        publish = true
     }
 }
 
