@@ -1,10 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.github.dcendents.android-maven'
-
-//libraryDescription = 'This project aims to provide a reusable permission grant manager to simplify the permission request procedure'
-//licenseName = 'The Apache Software License, Version 2.0'
-//licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'maven-publish'
 
 android {
     publishNonDefault true
@@ -39,53 +36,90 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
 }
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "zyc945"
+            name "zyc945"
+            email "zyc945@gmail.com"
+        }
+    }
+}
 
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-    configurations = ['archives']
-    pkg {
-        repo = "maven"
-        name = "grant-permissions"
-        websiteUrl = SITE_URL
-        vcsUrl = GIT_SITE_URL
-        licenses = ["Apache-2.0"]
-        publish = true
-        version {
-            desc = 'This project aims to provide a reusable permission grant manager to simplify the permission request procedure'
-            gpg {
-                sign = true
-                passphrase = properties.getProperty("bintray.gpg.password")
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            groupId GROUP_ID
+            artifactId POM_ARTIFACT_ID
+            version VERSION_NAME
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'This project aims to provide a reusable permission grant manager to simplify the permission request procedure')
+                root.children().last() + pomConfig
             }
         }
     }
 }
 
-install {
-    repositories.mavenInstaller {
-        pom {
-            project {
-                packaging 'aar'
+//install {
+//    repositories.mavenInstaller {
+//        pom {
+//            project {
+//                packaging 'aar'
+//
+//                name 'grant-permissions'
+//                version VERSION_NAME
+//                url SITE_URL
+//
+//                licenses {
+//                    license {
+//                        name 'The Apache Software License, Version 2.0'
+//                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                    }
+//                }
+//
+//                developers {
+//                    developer {
+//                        id 'zyc945'
+//                        name 'zyc945'
+//                        email 'zyc945@gmail.com'
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
-                name 'grant-permissions'
-                url SITE_URL
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    publications = ['MyPublication']
 
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'zyc945'
-                        name 'zyc945'
-                        email 'zyc945@gmail.com'
-                    }
-                }
+    pkg {
+        repo = REMOTE_REPO
+        name = POM_ARTIFACT_ID
+        websiteUrl = SITE_URL
+        vcsUrl = GIT_SITE_URL
+        licenses = ["Apache-2.0"]
+        publish = true
+        version {
+            name = VERSION_NAME
+            released  = new Date()
+//            desc = 'This project aims to provide a reusable permission grant manager to simplify the permission request procedure'
+            gpg {
+                sign = true
+                passphrase = properties.getProperty("bintray.gpg.password")
             }
         }
     }
