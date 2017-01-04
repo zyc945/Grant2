@@ -16,7 +16,6 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,7 +29,7 @@ import java.util.Set;
 public class PermissionsManager {
     public static final String TAG = PermissionsManager.class.getSimpleName();
     private static final Set<String> PENDING_AUTHORIZED_PERMISSIONS = new HashSet<>();
-    private static final List<WeakReference<PermissionsResultAction>> PENDING_AUTHORIZED_RESULT_ACTIONS = new ArrayList<>();
+    private static final List<PermissionsResultAction> PENDING_AUTHORIZED_RESULT_ACTIONS = new ArrayList<>();
 
     /**
      * permission authorized result
@@ -126,7 +125,7 @@ public class PermissionsManager {
             return;
         }
         action.registerPermissions(permissions);
-        PENDING_AUTHORIZED_RESULT_ACTIONS.add(new WeakReference<>(action));
+        PENDING_AUTHORIZED_RESULT_ACTIONS.add(action);
     }
 
     /**
@@ -138,10 +137,10 @@ public class PermissionsManager {
      * @param action the action to remove
      */
     private static synchronized void removePendingAction(@Nullable PermissionsResultAction action) {
-        for (Iterator<WeakReference<PermissionsResultAction>> iterator = PENDING_AUTHORIZED_RESULT_ACTIONS.iterator();
+        for (Iterator<PermissionsResultAction> iterator = PENDING_AUTHORIZED_RESULT_ACTIONS.iterator();
              iterator.hasNext(); ) {
-            WeakReference<PermissionsResultAction> weakRef = iterator.next();
-            if (weakRef.get() == action || weakRef.get() == null) {
+            PermissionsResultAction reference = iterator.next();
+            if (reference == action) {
                 iterator.remove();
             }
         }
@@ -314,9 +313,9 @@ public class PermissionsManager {
         if (results.length < size) {
             size = results.length;
         }
-        Iterator<WeakReference<PermissionsResultAction>> iterator = PENDING_AUTHORIZED_RESULT_ACTIONS.iterator();
+        Iterator<PermissionsResultAction> iterator = PENDING_AUTHORIZED_RESULT_ACTIONS.iterator();
         while (iterator.hasNext()) {
-            PermissionsResultAction action = iterator.next().get();
+            PermissionsResultAction action = iterator.next();
             for (int n = 0; n < size; n++) {
                 if (action == null || action.onResult(permissions[n], results[n])) {
                     iterator.remove();
@@ -333,7 +332,7 @@ public class PermissionsManager {
      * When request permissions on devices before Android M (Android 6.0, API Level 23)
      * Do the granted or denied work directly according to the permission status
      *
-     * @param context    the context to check permissions
+     * @param context     the context to check permissions
      * @param permissions the permissions names
      * @param action      the callback work object, containing what we what to do after
      *                    permission check
@@ -359,7 +358,7 @@ public class PermissionsManager {
      * If a permission is not granted, add it to the result list
      * if a permission is granted, do the granted work, do not add it to the result list
      *
-     * @param context    the context to check permissions
+     * @param context     the context to check permissions
      * @param permissions all the permissions names
      * @param action      the callback work object, containing what we what to do after
      *                    permission check
