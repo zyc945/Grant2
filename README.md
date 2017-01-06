@@ -4,7 +4,13 @@ inspire by the project [Grant](https://github.com/anthonycr/Grant)
 
 ## Gradle usage：
 
-> compile 'com.zyc945.grant:grant-permissions:0.3.0'
+1. add compile dependency
+
+  > compile 'com.zyc945.grant:grant-permissions:0.4.0'
+
+2. add repository
+
+  > repositories{ maven { url '<https://dl.bintray.com/mrz0/maven/>' } }
 
 ## Feature：
 

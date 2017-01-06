@@ -1,0 +1,106 @@
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = POM_GROUP_ID
+version = VERSION_NAME
+
+afterEvaluate { project ->
+    install {
+        repositories.mavenInstaller {
+            configurePOM(pom);
+        }
+    }
+}
+
+private configurePOM(def pom) {
+    pom.project {
+        packaging POM_PACKAGING
+        groupId POM_GROUP_ID
+        artifactId POM_ARTIFACT_ID
+
+        name POM_NAME
+        description POM_DESCRIPTION
+        url POM_URL
+
+        version VERSION_NAME
+        inceptionYear POM_INCEPTION_YEAR
+
+        licenses {
+            license {
+                name POM_LICENCE_NAME
+                url POM_LICENCE_URL
+                distribution POM_LICENCE_DIST
+                comments POM_LICENCE_COMMENTS
+            }
+        }
+
+        developers {
+            developer {
+                id POM_DEVELOPER_ID
+                name POM_DEVELOPER_NAME
+                email POM_DEVELOPER_EMAIL
+                url POM_DEVELOPER_URL
+            }
+        }
+
+        scm {
+            url POM_SCM_URL
+            connection POM_SCM_CONNECTION
+            developerConnection POM_SCM_DEV_CONNECTION
+        }
+
+        issueManagement {
+            system POM_ISSUE_MANAGEMENT_SYSTEM
+            url POM_ISSUE_MANAGEMENT_URL
+        }
+    }
+}
+
+// Default Bintray
+def getRepositoryUser() {
+    return getLocalProperty('bintray.user')
+}
+
+def getRepositoryKey() {
+    return getLocalProperty('bintray.apikey')
+}
+
+def getRepositoryGPGPassword() {
+    return getLocalProperty('bintray.gpg.password')
+}
+
+def getLocalProperty(key) {
+    Properties localProperties = new Properties()
+    localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
+    return localProperties.getProperty(key)
+}
+
+bintray {
+    user = getRepositoryUser();
+    key = getRepositoryKey();
+
+    group = POM_GROUP_ID
+    version = VERSION_NAME
+
+    configurations = ['archives']
+
+    pkg {
+        repo = POM_BINTRAY_PRPO
+        name = POM_BINTRAY_NAME
+        desc = POM_DESCRIPTION
+        websiteUrl = POM_URL
+        vcsUrl = POM_GIT_URL
+        licenses = [POM_LICENCE_NAME]
+        publish = true
+        publicDownloadNumbers = true
+        version {
+            desc = POM_DESCRIPTION
+            gpg {
+                sign = !(getRepositoryGPGPassword() == null || getRepositoryGPGPassword() == "");
+                // true //Determines whether to GPG sign the files. The default is false
+                passphrase = getRepositoryGPGPassword();
+                //Optional. The passphrase for GPG signing'
+            }
+        }
+    }
+}

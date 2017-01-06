@@ -22,6 +22,9 @@ plugins {
 allprojects {
     repositories {
         jcenter()
+        maven {
+            url 'https://dl.bintray.com/mrz0/maven/'
+        }
     }
 }
 
